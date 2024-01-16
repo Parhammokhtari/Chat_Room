@@ -1,97 +1,100 @@
 "use client";
+import MessageLog from "@/components/MessageLog";
 import React, { useRef, useState, useEffect } from "react";
 
 export default function ChatRoom({ params }) {
   const dummySpace = useRef();
-  //   get user details
-  //  const { uid = 2, displayName, photoURL } = props.user;
+  const chatRooms = JSON.parse(localStorage.getItem("chatRooms"));
+  const prevMessages = chatRooms?.find(
+    (chatRoom) => chatRoom?.roomId == params?.roomId
+  );
   const uid = 2;
-  // initial states
-  const [messages, setMessages] = useState([]);
+
+  const [messages, setMessages] = useState(prevMessages?.messages || []);
   const [newMessage, setNewMessage] = useState("");
+  console.log({ params });
 
-  // automatically check db for new messages
   useEffect(() => {
-    // db.collection("messages")
-    //   .orderBy("createdAt")
-    //   .limit(100)
-    //   .onSnapshot((querySnapShot) => {
-    //     // get all documents from collection with id
-    //     const data = querySnapShot.docs.map((doc) => ({
-    //       ...doc.data(),
-    //       id: doc.id,
-    //     }));
-
-    //   update state
-
-    console.log(messages);
-
-    //  });
+    chatRooms?.forEach((chatRoom) => {
+      if (chatRoom?.roomId == params?.roomId) {
+        chatRoom.messages = messages;
+      }
+    });
+    localStorage.setItem("chatRooms", JSON.stringify(chatRooms));
   }, [messages]);
 
-  // when form is submitted
+  const botResponses = [
+    "Interesting...",
+    "Tell me more!",
+    "I see...",
+    "That's fascinating!",
+    "Hmm, I'm not sure.",
+    "I am good",
+    "how are you",
+    "what time is it?",
+  ];
+
+  // Function to send a random bot response after 5 seconds
+  const sendRandomBotResponse = () => {
+    setTimeout(() => {
+      const randomResponse =
+        botResponses[Math.floor(Math.random() * botResponses.length)];
+      const newMess = {
+        text: randomResponse,
+        createdAt: new Date(),
+        uid: 1,
+        displayName: "bot",
+      };
+      setMessages((prev) => [...prev, newMess]);
+    }, 2000);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // db.collection("messages").add({
-    //   text: newMessage,
-    //   createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    //   uid,
-    //   displayName,
-    //   photoURL,
-    // });
     const newMess = {
-      text: e,
+      text: newMessage,
       createdAt: new Date(),
       uid: 2, // params?.roomId,
-      displayName: "parhem",
+      displayName: "parham",
     };
     setMessages((prev) => [...prev, newMess]);
-    //  setNewMessage(e);
+    setNewMessage(""); // Clear the input after submitting
+    sendRandomBotResponse();
 
-    // scroll down the chat
-    // dummySpace.current.scrollIntoView({ behavor: "smooth" });
+    dummySpace.current.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <main id="chat_room">
-      <ul>
-        {messages.map((message) => (
-          <li
-            key={message?.id}
-            className={message.uid === uid ? "sent" : "received"}
-          >
-            <section></section>
+    <main
+      className="bg-gray-400 p-5 rounded-xl flex flex-col"
+      id={`${params?.roomId}`}
+    >
+      <h1 className="font-bold text-2xl  mt-4 mb-5">
+        ChatRoom {params?.roomId}
+      </h1>
+      <div>
+        <ul className="flex flex-col">
+          {messages?.map((message) => (
+            <MessageLog message={message} userId={uid} />
+          ))}
+        </ul>
+      </div>
 
-            <section>
-              {/* display message text */}
-              <p>{message.text}</p>
-
-              {/* display user name */}
-              {message.displayName ? <span>{message.displayName}</span> : null}
-              <br />
-              {/* display message date and time */}
-              {message?.createdAt ? (
-                <span>{new Date(message.createdAt)}</span>
-              ) : null}
-            </section>
-          </li>
-        ))}
-      </ul>
-
-      {/* extra space to scroll the page when a new message is sent */}
       <section ref={dummySpace}></section>
-
-      {/* input form */}
-      <form onSubmit={handleSubmit}>
+      <form className="mt-5" onSubmit={handleSubmit}>
         <input
+          className="mr-5 p-2 rounded-md "
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type your message here..."
         />
 
-        <button type="submit" disabled={!newMessage}>
+        <button
+          className="bg-gray-200 hover:bg-green-500 p-2 rounded-full "
+          type="submit"
+          disabled={!newMessage}
+        >
           Send
         </button>
       </form>
