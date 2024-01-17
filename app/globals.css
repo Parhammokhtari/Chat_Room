@@ -13,3 +13,7 @@ body {
     )
     rgb(var(--background-start-rgb)); */
 }
+
+.max-height-chat-box {
+  max-height: 35rem;
+}

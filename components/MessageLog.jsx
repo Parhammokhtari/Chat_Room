@@ -6,9 +6,9 @@ const MessageLog = ({ message, userId }) => {
       key={message?.id}
       className={` ${
         message.uid === userId
-          ? "text-start justify-items-start"
-          : " justify-items-end text-end"
-      } mt-2 bg-gray-100 flex flex-col p-2 max-w-72 rounded-2xl`}
+          ? "text-start  self-start"
+          : "  text-end self-end"
+      } mt-2 bg-gray-100 flex flex-col p-2 max-w-2xl min-w-56 rounded-2xl`}
     >
       <section>
         {message.displayName ? (

@@ -1,25 +1,31 @@
 "use client";
+
+import { updateMessages } from "@/app/features/chatRoomsSlice/chatRoomsSlice";
 import MessageLog from "@/components/MessageLog";
 import React, { useRef, useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 
 export default function ChatRoom({ params }) {
   const dummySpace = useRef();
   const chatRooms = JSON.parse(localStorage.getItem("chatRooms"));
+  const chatRoomsfromStore = useSelector((state) => state?.chatRooms);
   const prevMessages = chatRooms?.find(
     (chatRoom) => chatRoom?.roomId == params?.roomId
   );
+
   const uid = 2;
 
+  const dispatch = useDispatch();
   const [messages, setMessages] = useState(prevMessages?.messages || []);
   const [newMessage, setNewMessage] = useState("");
-  console.log({ params });
-
   useEffect(() => {
+    // updateMessages({roomId,messages})
     chatRooms?.forEach((chatRoom) => {
       if (chatRoom?.roomId == params?.roomId) {
         chatRoom.messages = messages;
       }
     });
+    dispatch(updateMessages({ roomId: params?.roomId, messages }));
     localStorage.setItem("chatRooms", JSON.stringify(chatRooms));
   }, [messages]);
 
@@ -34,7 +40,6 @@ export default function ChatRoom({ params }) {
     "what time is it?",
   ];
 
-  // Function to send a random bot response after 5 seconds
   const sendRandomBotResponse = () => {
     setTimeout(() => {
       const randomResponse =
@@ -58,32 +63,37 @@ export default function ChatRoom({ params }) {
       displayName: "parham",
     };
     setMessages((prev) => [...prev, newMess]);
-    setNewMessage(""); // Clear the input after submitting
+    setNewMessage("");
     sendRandomBotResponse();
 
     dummySpace.current.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <main
-      className="bg-gray-400 p-5 rounded-xl flex flex-col"
-      id={`${params?.roomId}`}
-    >
-      <h1 className="font-bold text-2xl  mt-4 mb-5">
+    <>
+      <h1 className="font-bold bg-gray-300 text-2xl p-3 rounded-tl-xl rounded-tr-xl max-w-lg mt-4 5">
         ChatRoom {params?.roomId}
       </h1>
-      <div>
-        <ul className="flex flex-col">
-          {messages?.map((message) => (
-            <MessageLog message={message} userId={uid} />
-          ))}
-        </ul>
-      </div>
+      <main
+        className="bg-gray-400 p-5  max-w-lg flex flex-col max-height-chat-box overflow-y-scroll"
+        id={`${params?.roomId}`}
+      >
+        <div>
+          <ul className="flex flex-col">
+            {messages?.map((message) => (
+              <MessageLog key={message.id} message={message} userId={uid} />
+            ))}
+          </ul>
+        </div>
 
-      <section ref={dummySpace}></section>
-      <form className="mt-5" onSubmit={handleSubmit}>
+        <section ref={dummySpace}></section>
+      </main>
+      <form
+        className=" bg-gray-600 p-3 rounded-br-xl flex justify-between rounded-bl-xl max-w-lg "
+        onSubmit={handleSubmit}
+      >
         <input
-          className="mr-5 p-2 rounded-md "
+          className="mr-5 p-2 rounded-lg min-w-96"
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
@@ -91,13 +101,13 @@ export default function ChatRoom({ params }) {
         />
 
         <button
-          className="bg-gray-200 hover:bg-green-500 p-2 rounded-full "
+          className="bg-gray-200  hover:bg-green-500 p-2 rounded-full "
           type="submit"
           disabled={!newMessage}
         >
           Send
         </button>
       </form>
-    </main>
+    </>
   );
 }

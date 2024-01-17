@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const ChatBox = ({ chatRoomName, roomId }) => {
+const ChatBox = ({ chatRoomName, roomId, messages }) => {
   return (
     <div
       className={`bg-gray-800 shadow-md rounded-lg p-4 max-w-xl min-w-96 mx-4 my-2 transition-transform transform hover:scale-105`}
